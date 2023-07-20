@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 # from typing import Any
+import signal
 import traceback
 import sys, os
 
 import rospy
+from PyQt5.QtCore import QTimer
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64MultiArray as rosmsg_Float64MultiArray
 
-import rosilo_conversions as rc
-from rosilo_robot_driver import RobotDriverInterface
-import pathology_robot as PathologyRobot
-
+import sas_conversions as rc
+from sas_robot_driver import RobotDriverInterface
+from DQ_robot import DQRobot
 
 from end_effector_calibration_ui import EndEffectorCalibrationUI
 from PyQt5.QtWidgets import QApplication
@@ -22,8 +23,8 @@ class AbrivatedKinematicsInterface():
     def __init__(self, topic_prefix):
         self.tool_pose_ = None
         self.subscriber_tool_pose_ = rospy.Subscriber(topic_prefix + "get/pose",
-                                                        PoseStamped,
-                                                        self._callback_tool_pose)
+                                                      PoseStamped,
+                                                      self._callback_tool_pose)
 
     def is_enabled(self):
         if self.tool_pose_ is None:
@@ -36,13 +37,14 @@ class AbrivatedKinematicsInterface():
     def get_tool_pose(self):
         return self.tool_pose_
 
+
 def calibration_ui_main():
     rosrate = rospy.Rate(200)
     if calibrationConfig['use_tool_pose']:
         robot = None
     else:
-        robot_DH = PathologyRobot.VS050Robot(calibrationConfig['robot_parameter_file_path'])
-        robot = robot_DH.kinematics()
+        robot_h = DQRobot(calibrationConfig['robot_parameter_file_path'])
+        robot = robot_h.get_kinematics()
         # Define Joint Limits ([rad])
         robot_q_minus = robot.get_lower_q_limit()
         robot_q_plus = robot.get_upper_q_limit()
@@ -55,13 +57,14 @@ def calibration_ui_main():
 
         rospy.loginfo("[" + name + "]::Waiting to connect to RobotDriverInterface...")
         # Robot driver interface
-        robot_interface = RobotDriverInterface(rosConfig['arm_driver_ns']+'joints/')
+        robot_interface = RobotDriverInterface(rosConfig['arm_driver_ns'])
         while not robot_interface.is_enabled():
             rosrate.sleep()
         rospy.loginfo("[" + name + "]:: robot_interface enabled.")
 
         if calibrationConfig['use_tool_pose']:
-            robot_kinematics_interface = AbrivatedKinematicsInterface(rosConfig['arm_driver_ns']+'pose/')
+            robot_kinematics_interface = AbrivatedKinematicsInterface(os.path.join(rosConfig['arm_driver_ns'],
+                                                                                   'pose/'))
             while not robot_kinematics_interface.is_enabled():
                 rosrate.sleep()
         else:
@@ -73,10 +76,10 @@ def calibration_ui_main():
 
     except Exception as exp:
         # traceback.print_exc()
-        rospy.logerr("[" + name + "]::"+traceback.format_exc())
+        rospy.logerr("[" + name + "]::" + traceback.format_exc())
         rospy.signal_shutdown(name + ": ERROR on ros Init")
 
-    robot={
+    robot = {
         "robot": robot,
         "robot_interface": robot_interface,
         "robot_kinematics_interface": robot_kinematics_interface,
@@ -85,8 +88,24 @@ def calibration_ui_main():
 
     app = QApplication([])
     widget = EndEffectorCalibrationUI(robot, rosConfig, calibrationConfig)
-    widget.show()
-    sys.exit(app.exec_())
+
+    signal.signal(signal.SIGINT, sigint_handler)
+    timer = QTimer()
+    timer.start(500)  # You may change this if you wish.
+    timer.timeout.connect(lambda: None)  # Let the interpreter run each 500 ms.
+    try:
+        widget.show()
+        ret = app.exec()
+        sys.exit(ret)
+    except KeyboardInterrupt:
+        rospy.logerr(name + ": caught sig interrupt")
+        widget.close()
+        app.exit()
+
+
+def sigint_handler(*args):
+    """Handler for the SIGINT signal."""
+    QApplication.quit()
 
 
 if __name__ == "__main__":

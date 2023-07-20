@@ -82,10 +82,15 @@ class EndEffectorCalibrationUI(QWidget):
             self.poseListWidget.insertItem(ind, key)
 
     def update_ros_param_(self):
-        rospy.set_param(self._calibrationConfig['calibration_data_namespace'] + "calibration_joint",
-                        self._calibration_joint_list)
+        for key, joint_q in self._calibration_joint_list.items():
+            if not isinstance(joint_q, list):
+                joint_q = joint_q.tolist()
+            rospy.set_param(os.path.join(self._calibrationConfig['calibration_data_namespace'],
+                                         "calibration_joint", key),
+                            joint_q)
         for key, pose in self._calibration_pose_list.items():
-            rospy.set_param(self._calibrationConfig['calibration_data_namespace'] + "calibration_pose/" + key,
+            rospy.set_param(os.path.join(self._calibrationConfig['calibration_data_namespace'],
+                                         "calibration_pose", key),
                             pose.vec8().tolist())
 
     def set_max_entry_count_(self):
@@ -177,7 +182,7 @@ class EndEffectorCalibrationUI(QWidget):
         rospy.loginfo("[" + self._rosConfig['name'] + "]::Distance vector found as = " + str(d))
 
         calibration_resultdq = dql.DQ([1, 0, 0, 0, 0, d[1], d[2], d[3]])
-        rospy.set_param(self._calibrationConfig['calibration_data_namespace'] + "calibration/result",
+        rospy.set_param(os.path.join(self._calibrationConfig['calibration_data_namespace'], "calibration", "result"),
                         calibration_resultdq.q.tolist())
         data = {
             "translation": d[1:].tolist(),
