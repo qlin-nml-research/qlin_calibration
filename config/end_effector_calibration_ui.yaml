@@ -1,0 +1,59 @@
+# #if true, will use driver tool pose instead of current fkm model
+use_tool_pose: true
+
+#robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_official_arm.json"
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U473.json" # right arm
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U483.json" # left arm
+
+# Robot Driver
+# arm_driver_namespace: "/arm1/"
+# arm_driver_namespace: "/arm2/"
+# denso_communication
+# arm_driver_namespace: "/arm1/"
+# arm_driver_namespace: "/arm2/"
+
+###################################################
+# for calibration tip
+###################################################
+# arm_driver_namespace: "/arm2/"
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U483.json" # left arm
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_calibration_tip.yaml"
+# calibration_data_namespace: "/pathology/arm2_cal_tip/"
+
+###################################################
+# for knife config 1/2 and direction
+###################################################
+# arm_driver_namespace: "/arm2/"
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U483.json" # left arm
+#### back tip for x position
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_knife1.yaml"
+# calibration_data_namespace: "/pathology/arm2_knife1/"
+#### front tip for orientation correction
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_knife1_ref.yaml"
+# calibration_data_namespace: "/pathology/arm2_knife1_ref/"
+
+###################################################
+# for knife config 3 and direction
+###################################################
+arm_driver_namespace: "/arm2/"
+robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U483.json" # left arm
+#### back tip for x position
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_knife3.yaml"
+# calibration_data_namespace: "/pathology/arm2_knife3/"
+#### front tip for orientation correction
+end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_knife3_ref.yaml"
+calibration_data_namespace: "/pathology/arm2_knife3_ref/"
+
+
+###################################################
+# Temp for koyama-san setup
+###################################################
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm2_ee.yaml"
+# calibration_data_namespace: "/robot/arm2_ee/"
+# arm_driver_namespace: "/arm2/"
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U483.json" # left arm
+
+# end_effector_info_save_path: "$(find pathology_calibration)/calibration_result/arm1_ee.yaml"
+# calibration_data_namespace: "/robot/arm1_ee/"
+# arm_driver_namespace: "/arm1/"
+# robot_parameter_file_path: "$(find pathology_robot)/robots/denso_vs050_denso_11U473.json" # right arm
