@@ -1,0 +1,8 @@
+# #if true, will use driver tool pose instead of current fkm model
+use_tool_pose: false
+
+arm_driver_namespace: "/arm3"
+robot_parameter_file_path: "$(find aisp_ros_robot)/robots/aisp_vs050_robot_1.json"
+
+end_effector_info_save_path: "$(find qlin_calibration)/calibration_result/example.yaml"
+calibration_data_namespace: "/moonshot_cal/arm1_exp/"
